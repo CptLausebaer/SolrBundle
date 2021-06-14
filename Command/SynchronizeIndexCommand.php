@@ -36,7 +36,7 @@ class SynchronizeIndexCommand extends ContainerAwareCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $entities = $this->getIndexableEntities($input->getArgument('entity'));
+        $indexableEntities = $this->getIndexableEntities($input->getArgument('entity'));
         $source = $input->getOption('source');
         if ($source !== null) {
             $output->writeln('<comment>The source option is deprecated and will be removed in version 2.0</comment>');
@@ -46,13 +46,13 @@ class SynchronizeIndexCommand extends ContainerAwareCommand
         $batchSize = $input->getOption('flushsize');
         $solr = $this->getContainer()->get('solr.client');
 
-        if ($startOffset > 0 && count($entities) > 1) {
+        if ($startOffset > 0 && count($indexableEntities) > 1) {
             $output->writeln('<error>Wrong usage. Please use start-offset option together with the entity argument.</error>');
 
             return;
         }
 
-        foreach ($entities as $entityClassname) {
+        foreach ($indexableEntities as $entityClassname) {
             $objectManager = $this->getObjectManager($entityClassname);
 
             $output->writeln(sprintf('Indexing: <info>%s</info>', $entityClassname));
@@ -100,21 +100,24 @@ class SynchronizeIndexCommand extends ContainerAwareCommand
                 try {
                     $solr->synchronizeIndex($entities);
                 } catch (\Exception $e) {
-                    $output->writeln(sprintf('A error occurs: %s', $e->getMessage()));
+                    $output->writeln(sprintf('An error occured: %s', $e->getMessage()));
                 }
             }
 
             $output->writeln('<info>Synchronization finished</info>');
             $output->writeln('');
+
+            // Clear ObjectManager to make sure no proxies but real entities are loaded
+            $objectManager->clear();
         }
     }
 
     /**
      * @param string $entityClassname
      *
+     * @return ObjectManager
      * @throws \RuntimeException if no doctrine instance is configured
      *
-     * @return ObjectManager
      */
     private function getObjectManager($entityClassname)
     {
@@ -168,7 +171,7 @@ class SynchronizeIndexCommand extends ContainerAwareCommand
      * Get the total number of entities in a repository
      *
      * @param string $entity
-     * @param int    $startOffset
+     * @param int $startOffset
      *
      * @return int
      *
