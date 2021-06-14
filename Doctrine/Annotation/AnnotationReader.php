@@ -89,7 +89,7 @@ class AnnotationReader
 
     /**
      * @param object $entity
-     * 
+     *
      * @return array
      *
      * @throws \ReflectionException
@@ -108,7 +108,7 @@ class AnnotationReader
             }
 
             $annotation->value = $method->invoke($entity);
-            
+
             if ($annotation->name == '') {
                 throw new SolrMappingException(sprintf('Please configure a field-name for method "%s" with field-annotation in class "%s"', $method->getName(), get_class($entity)));
             }
@@ -213,6 +213,11 @@ class AnnotationReader
 
         $mapping = [];
         foreach ($fields as $field) {
+            $mapping[$field->getNameWithAlias()] = $field->name;
+        }
+
+        $methods = $this->getMethods($entity);
+        foreach ($methods as $field) {
             $mapping[$field->getNameWithAlias()] = $field->name;
         }
 
