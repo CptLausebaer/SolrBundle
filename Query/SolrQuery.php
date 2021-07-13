@@ -3,6 +3,7 @@
 namespace FS\SolrBundle\Query;
 
 use FS\SolrBundle\Query\Exception\UnknownFieldException;
+use Solarium\QueryType\Select\Query\Query;
 
 class SolrQuery extends AbstractQuery
 {
@@ -160,7 +161,7 @@ class SolrQuery extends AbstractQuery
      *
      * @return SolrQuery
      */
-    public function addField($field)
+    public function addField($field): Query
     {
         $entityFieldNames = array_flip($this->mappedFields);
         if (array_key_exists($field, $entityFieldNames)) {
@@ -173,7 +174,7 @@ class SolrQuery extends AbstractQuery
     /**
      * {@inheritdoc}
      */
-    public function addFilterQuery($filterQuery)
+    public function addFilterQuery($filterQuery): Query
     {
         if ($this->getFilterQuery('id')) {
             return $this;
@@ -185,13 +186,13 @@ class SolrQuery extends AbstractQuery
     /**
      * @return string
      */
-    public function getQuery()
+    public function getQuery(): ?string
     {
         $searchTerms = array_merge($this->searchTerms, $this->childQueries);
 
         $keyField = $this->getMetaInformation()->getDocumentKey();
 
-        $documentLimitation = $this->createFilterQuery('id')->setQuery('id:'.$keyField.'*');
+        $documentLimitation = $this->createFilterQuery('id')->setQuery('id:' . $keyField . '*');
 
         $this->addFilterQuery($documentLimitation);
         if ($this->customQuery) {
@@ -257,12 +258,12 @@ class SolrQuery extends AbstractQuery
         if (is_array($fieldValue) && count($fieldValue) > 1) {
             sort($fieldValue);
 
-            $quoted = array_map(function($value) {
-                return '"'. $value .'"';
+            $quoted = array_map(function ($value) {
+                return '"' . $value . '"';
             }, $fieldValue);
 
             $fieldValue = implode(' TO ', $quoted);
-            $fieldValue = '['. $fieldValue . ']';
+            $fieldValue = '[' . $fieldValue . ']';
 
             return $fieldValue;
         }
@@ -277,7 +278,7 @@ class SolrQuery extends AbstractQuery
 
         $termParts = explode(' ', $fieldValue);
         if (count($termParts) > 1) {
-            $fieldValue = '"'.$fieldValue.'"';
+            $fieldValue = '"' . $fieldValue . '"';
         }
 
         return $fieldValue;
