@@ -68,7 +68,7 @@ class MetaInformationFactory
         $metaInformation->setFields($fields);
         $metaInformation->setRepository($this->annotationReader->getRepository($entity));
         $metaInformation->setIdentifier($this->annotationReader->getIdentifier($entity));
-        $metaInformation->setBoost($this->annotationReader->getEntityBoost($entity));
+        $metaInformation->setBoost($this->annotationReader->getEntityBoost($entity) ?? $metaInformation->getBoost());
         $metaInformation->setSynchronizationCallback($this->annotationReader->getSynchronizationCallback($entity));
         $metaInformation->setIndex($this->annotationReader->getDocumentIndex($entity));
         $metaInformation->setIsDoctrineEntity($this->isDoctrineEntity($entity));
