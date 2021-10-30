@@ -362,7 +362,7 @@ class Solr implements SolrInterface
             if ($core == '') {
                 $core = reset($endpoints);
             }
-            $buffer->setEndpoint($core);
+            $buffer->setEndpoint($endpoints[$core]);
 
             $buffer->commit();
         }
